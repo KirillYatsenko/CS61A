@@ -4,39 +4,31 @@
 (define (all-total-help cards total totals)
 
 	(define (is-ace card)
-	(
-	   cond ((equal? (first card) 'a) #t)
-           (else #f)
-        )
-)
+	   (cond ((equal? (first card) 'a) #t)
+           (else #f)))
+
 	(define (card-value card)	
-		(card-value-helper card (word) ))
+		(card-value-helper card (word)))
 
 	(define (card-value-helper card value)
 			(cond ((empty? card) value)
-			      ((or(member? (first card) '123456789) (equal? (first card) '0) ) (
-					card-value-helper (butfirst card) (word value (first card)) 
-			      ))
-			(else value)
-	))
-
+			      ((or(member? (first card) '123456789) (equal? (first card) '0)) 
+					(card-value-helper (butfirst card) (word value (first card))))	      
+			(else value)))
+	
 	(define (test-sentence sente count)
 		(cond ((= count 0) sente)
-		      (else (test-sentence (se sente 'ab) (- count 1) ))
-		)
-	)
+		      (else (test-sentence (se sente 'ab) (- count 1)))))
+		
 	(cond 
 	      ((> total 21) 0 )
 	      ((empty? cards) total )
 	      ((not (is-ace (first cards)))
-	      	(se totals (all-total-help (butfirst cards) (+ total (card-value (first cards))) totals ))
-	      )
+	      	(se totals (all-total-help (butfirst cards) (+ total (card-value (first cards))) totals )))    
 	      ((is-ace (first cards)) 
 		(se totals (all-total-help (butfirst cards) (+ total 1) totals) 
-			   (all-total-help (butfirst cards) (+ total 11) totals))
-	       )
-	)
-)
+			   (all-total-help (butfirst cards) (+ total 11) totals)))))
+	 
 
 (define (twenty-one strategy)
   (define (play-dealer customer-hand dealer-hand-so-far rest-of-deck)
@@ -80,19 +72,3 @@
 	deck
     	(move-card deck '() (random size)) ))
   (shuffle (make-ordered-deck) 52) )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;                                      32
