@@ -1,33 +1,30 @@
+(define (all-total cards)
+	(all-total-help cards 0 '()))
 
+(define (all-total-help cards total totals)
 
-(define (is-ace card)
+	(define (is-ace card)
 	(
 	   cond ((equal? (first card) 'a) #t)
            (else #f)
         )
 )
+	(define (card-value card)	
+		(card-value-helper card (word) ))
 
-(define (card-value card)	
-	(card-value-helper card (word) ))
+	(define (card-value-helper card value)
+			(cond ((empty? card) value)
+			      ((or(member? (first card) '123456789) (equal? (first card) '0) ) (
+					card-value-helper (butfirst card) (word value (first card)) 
+			      ))
+			(else value)
+	))
 
-(define (card-value-helper card value)
-		(cond ((empty? card) value)
-		      ((or(member? (first card) '123456789) (equal? (first card) '0) ) (
-				card-value-helper (butfirst card) (word value (first card)) 
-		      ))
-		(else value)
-))
-
-(define (test-sentence sente count)
-	(cond ((= count 0) sente)
-	      (else (test-sentence (se sente 'ab) (- count 1) ))
+	(define (test-sentence sente count)
+		(cond ((= count 0) sente)
+		      (else (test-sentence (se sente 'ab) (- count 1) ))
+		)
 	)
-)
-
-(define (all-total cards)
-	(all-total-help cards 0 '()))
-
-(define (all-total-help cards total totals)
 	(cond 
 	      ((> total 21) 0 )
 	      ((empty? cards) total )
