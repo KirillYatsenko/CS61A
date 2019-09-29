@@ -39,6 +39,10 @@
 	(find-max-total (all-total cards) 0))
 
 
+(define (stop-at-17 hand)
+	   (cond ((>= hand 17) #f)
+	   (else #t)))
+
 (define (twenty-one strategy)
   (define (play-dealer customer-hand dealer-hand-so-far rest-of-deck)
     (cond ((> (best-total dealer-hand-so-far) 21) 1)
