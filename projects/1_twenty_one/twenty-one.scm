@@ -1,34 +1,43 @@
-(define (all-total cards)
-	(all-total-help cards 0 '()))
+(define (best-total cards)
 
-(define (all-total-help cards total totals)
+	(define (find-max-total totals current-max)
+		(cond ((empty? totals) current-max)
+		      ((> (first totals) current-max) (find-max-total (butfirst totals) (first totals)))	
+		      (else (find-max-total (butfirst totals) current-max))))
 
-	(define (is-ace card)
-	   (cond ((equal? (first card) 'a) #t)
-           (else #f)))
+	(define (all-total cards)
+		(all-total-help cards 0 '()))
 
-	(define (card-value card)	
-		(card-value-helper card (word)))
+	(define (all-total-help cards total totals)
 
-	(define (card-value-helper card value)
-			(cond ((empty? card) value)
-			      ((or(member? (first card) '123456789) (equal? (first card) '0)) 
-					(card-value-helper (butfirst card) (word value (first card))))	      
-			(else value)))
-	
-	(define (test-sentence sente count)
-		(cond ((= count 0) sente)
-		      (else (test-sentence (se sente 'ab) (- count 1)))))
+		(define (is-ace card)
+		   (cond ((equal? (first card) 'a) #t)
+		   (else #f)))
+
+		(define (card-value card)	
+			(card-value-helper card (word)))
+
+		(define (card-value-helper card value)
+				(cond ((empty? card) value)
+				      ((or(member? (first card) '123456789) (equal? (first card) '0)) 
+						(card-value-helper (butfirst card) (word value (first card))))	      
+				(else value)))
 		
-	(cond 
-	      ((> total 21) 0 )
-	      ((empty? cards) total )
-	      ((not (is-ace (first cards)))
-	      	(se totals (all-total-help (butfirst cards) (+ total (card-value (first cards))) totals )))    
-	      ((is-ace (first cards)) 
-		(se totals (all-total-help (butfirst cards) (+ total 1) totals) 
-			   (all-total-help (butfirst cards) (+ total 11) totals)))))
-	 
+		(define (test-sentence sente count)
+			(cond ((= count 0) sente)
+			      (else (test-sentence (se sente 'ab) (- count 1)))))
+			
+		(cond 
+		      ((> total 21) 0 )
+		      ((empty? cards) total )
+		      ((not (is-ace (first cards)))
+		      	(se totals (all-total-help (butfirst cards) (+ total (card-value (first cards))) totals )))    
+		      ((is-ace (first cards)) 
+			(se totals (all-total-help (butfirst cards) (+ total 1) totals) 
+				   (all-total-help (butfirst cards) (+ total 11) totals)))))
+
+	(find-max-total (all-total cards) 0))
+
 
 (define (twenty-one strategy)
   (define (play-dealer customer-hand dealer-hand-so-far rest-of-deck)
