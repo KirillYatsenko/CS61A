@@ -13,16 +13,6 @@
 		(define (is-ace card)
 		   (cond ((equal? (first card) 'a) #t)
 		   (else #f)))
-
-		(define (card-value card)	
-			(card-value-helper card (word)))
-
-		(define (card-value-helper card value)
-				(cond ((empty? card) value)
-				      ((or(member? (first card) '123456789) (equal? (first card) '0)) 
-						(card-value-helper (butfirst card) (word value (first card))))
-				      ((member? (first card) 'jqk) 10)    
-				(else value)))
 		
 		(define (test-sentence sente count)
 			(cond ((= count 0) sente)
@@ -39,25 +29,52 @@
 	(find-max-total (all-total cards) (first (all-total cards)) ))
 
 
+(define (card-value card)	
+		(card-value-helper card (word)))
+
+		(define (card-value-helper card value)
+				(cond ((empty? card) value)
+				      ((or(member? (first card) 'a123456789) (equal? (first card) '0)) 
+						(card-value-helper (butfirst card) (word value (first card))))
+				      ((member? (first card) 'jqk) 10)    
+				(else value)))
+
+
+
+;#####################  Strategies  ###################################
+
 (define (stop-at-17 customer-hand-so-far dealer-up-card rest-of-deck)
 	   (cond ((>= (best-total customer-hand-so-far) 17) #f)
 	   (else #t)))
 
-(define (play-n strategy n)
-	(define (play-n-helper strategy n count win loss )
-		(let ((twenty-one-result (twenty-one strategy)))
-			(cond ((equal? count n) (- win loss) )
-			      ((equal? twenty-one-result -1 ) (play-n-helper strategy n (+ count 1) win (+ loss 1)))
-			      ((equal? twenty-one-result 0  ) (play-n-helper strategy n (+ count 1) win loss      ))
-			      ((equal? twenty-one-result 1  ) (play-n-helper strategy n (+ count 1) (+ win 1) loss)))))
+(define (dealer-sensitive dealer-hand customer-hand)
+	(cond ((and (exists-at-least-1 dealer-hand '(ac ad ah as 7c 7d 7h 7s 8c 8d 8h 8s 9c 9d 9h 9s 10c 10d 10h 10s jc jd jh js qc qd qh qs kc kd kh ks)) (< (best-total customer-hand) 17)) #t)
+	      ((and (exists-at-least-1 dealer-hand '(2c 2d 2h 2s 3c 3d 3h 3s 4c 4d 4h 4s 5c 5d 5h 5s 6c 6d 6h 6s jc jd jh js qc qd qh qs kc kd kh ks)) (< (best-total customer-hand) 12)) #t)
+	(else #f)))
 
-	(play-n-helper strategy n 0 0 0))
+;######################################################################
+
+
+(define (exists-at-least-1 in-cards cards)
+	(cond ((empty? cards) #f)
+	      ((member? (first cards) in-cards ) #t)
+	(else (exists-at-least-1 in-cards (butfirst cards)))))
+
+(define (play-n strategy dealer-strategy n)
+	(define (play-n-helper strategy dealer-strategy n count win loss )
+		(let ((twenty-one-result (twenty-one strategy dealer-strategy)))
+			(cond ((equal? count n) (- win loss) )
+			      ((equal? twenty-one-result -1 )  (play-n-helper strategy dealer-strategy n (+ count 1) win (+ loss 1)))
+			      ((equal? twenty-one-result 0  )  (play-n-helper strategy dealer-strategy n (+ count 1) win loss      ))
+			      ((equal? twenty-one-result 1  )  (play-n-helper strategy dealer-strategy n (+ count 1) (+ win 1) loss)))))
+
+	(play-n-helper strategy dealer-strategy n 0 0 0))
 			
 				
-(define (twenty-one strategy)
+(define (twenty-one strategy dealer-strategy)
   (define (play-dealer customer-hand dealer-hand-so-far rest-of-deck)
     (cond ((> (best-total dealer-hand-so-far) 21) 1)
-	  ((< (best-total dealer-hand-so-far) 17)
+	  ((dealer-strategy dealer-hand-so-far customer-hand)
 	   (play-dealer customer-hand
 			(se dealer-hand-so-far (first rest-of-deck))
 			(bf rest-of-deck)))
