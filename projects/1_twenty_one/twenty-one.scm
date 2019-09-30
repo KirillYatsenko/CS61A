@@ -43,9 +43,9 @@
 
 ;#####################  Strategies  ###################################
 
-(define (stop-at-17 customer-hand-so-far dealer-up-card rest-of-deck)
-	   (cond ((>= (best-total customer-hand-so-far) 17) #f)
-	   (else #t)))
+(define (stop-at n)
+	(lambda (customer-hand-so-far dealer-up-card rest-of-deck) 
+		(cond ((>= (best-total customer-hand-so-far) n) #f) (else #t))))
 
 (define (dealer-sensitive dealer-hand customer-hand)
 	(cond ((and (exists-at-least-1 dealer-hand '(ac ad ah as 7c 7d 7h 7s 8c 8d 8h 8s 9c 9d 9h 9s 10c 10d 10h 10s jc jd jh js qc qd qh qs kc kd kh ks)) (< (best-total customer-hand) 17)) #t)
