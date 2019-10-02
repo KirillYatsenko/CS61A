@@ -50,9 +50,8 @@
 	(lambda (customer-hand-so-far dealer-up-card rest-of-deck)
 	  (cond ((exists-at-least-1 customer-hand-so-far (se (word 'a suit) (word '2 suit) (word '3 suit) (word '4 suit) (word '5 suit) (word '6 suit) (word '7 suit) (word '8 suit) (word '9 suit) (word '10 suit) (word 'j suit) (word 'q suit) (word 'k suit) )) include-strategy ) (else not-include-strategy) ) ))
 
-
 (define (valentine customer-hand-so-far dealer-up-card rest-of-deck)
-	(cond ((exists-at-least-1 customer-hand-so-far '(ah 2h 3h 4h 5h 6h 7h 8h 9h 10h jh qh kh) ) (stop-at 19)) (else (stop-at 17))))
+	(suit-strategy 'a (stop-at 19) (stop-at 17)))
 
 (define (dealer-sensitive dealer-hand customer-hand)
 	(cond ((and (exists-at-least-1 dealer-hand '(ac ad ah as 7c 7d 7h 7s 8c 8d 8h 8s 9c 9d 9h 9s 10c 10d 10h 10s jc jd jh js qc qd qh qs kc kd kh ks)) (< (best-total customer-hand) 17)) #t)
