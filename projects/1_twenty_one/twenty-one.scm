@@ -1,4 +1,4 @@
-(define (best-total cards)
+4(define (best-total cards)
 
 	(define (find-max-total totals current-max)
 		(cond ((empty? totals) current-max)
@@ -42,6 +42,13 @@
 
 
 ;#####################  Strategies  ###################################
+(define (majority 1st-strategy 2nd-strategy 3rd-strategy)
+	(lambda (customer dealer deck)
+		(cond
+		      ((and (1st-strategy customer dealer deck) (2nd-strategy customer dealer deck)) #t )
+		      ((and (1st-strategy customer dealer deck) (3rd-strategy customer dealer deck)) #t )
+		      (else  #f ))))
+
 (define (stop-at n)
 	(lambda (customer-hand-so-far dealer-up-card rest-of-deck) 
 		(cond ((>= (best-total customer-hand-so-far) n) #f) (else #t))))
