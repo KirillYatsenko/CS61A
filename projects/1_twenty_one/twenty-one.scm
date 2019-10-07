@@ -9,7 +9,11 @@
 		(all-total-help cards 0 '()))
 
 	(define (all-total-help cards total totals)
-
+		
+	  	(define (is-jocker card)
+		   (cond ((equal? (first card) 'r) #t)
+		   (else #f)))
+		
 		(define (is-ace card)
 		   (cond ((equal? (first card) 'a) #t)
 		   (else #f)))
@@ -20,11 +24,23 @@
 			
 		(cond 
 		      ((empty? cards) total )
-		      ((not (is-ace (first cards)))
+		      ((not (or (is-ace (first cards)) (is-jocker (first cards))))
 		      	(se totals (all-total-help (butfirst cards) (+ total (card-value (first cards))) totals )))    
 		      ((is-ace (first cards)) 
-			(se totals (all-total-help (butfirst cards) (+ total 1) totals) 
-				   (all-total-help (butfirst cards) (+ total 11) totals)))))
+								(se totals (all-total-help (butfirst cards) (+ total 1) totals) 
+												   (all-total-help (butfirst cards) (+ total 11) totals)))
+		      ((is-jocker (first cards)) 
+							(se totals (all-total-help (butfirst cards) (+ total 1) totals) 
+									(all-total-help (butfirst cards) (+ total 2) totals)
+									(all-total-help (butfirst cards) (+ total 3) totals)
+									(all-total-help (butfirst cards) (+ total 4) totals)
+									(all-total-help (butfirst cards) (+ total 5) totals)
+									(all-total-help (butfirst cards) (+ total 6) totals)
+									(all-total-help (butfirst cards) (+ total 7) totals)s
+									(all-total-help (butfirst cards) (+ total 8) totals)
+									(all-total-help (butfirst cards) (+ total 9) totals)
+									(all-total-help (butfirst cards) (+ total 10) totals)
+									(all-total-help (butfirst cards) (+ total 11) totals)))))		   
 
 	(find-max-total (all-total cards) (first (all-total cards)) ))
 
@@ -34,7 +50,7 @@
 
 		(define (card-value-helper card value)
 				(cond ((empty? card) value)
-				      ((or(member? (first card) 'a123456789) (equal? (first card) '0)) 
+				      ((or(member? (first card) 'ra123456789) (equal? (first card) '0)) 
 						(card-value-helper (butfirst card) (word value (first card))))
 				      ((member? (first card) 'jqk) 10)    
 				(else value)))
@@ -114,7 +130,7 @@
 
 (define (make-ordered-deck)
   (define (make-suit s)
-    (every (lambda (rank) (word rank s)) '(A 2 3 4 5 6 7 8 9 10 J Q K)) )
+    (every (lambda (rank) (word rank s)) '(R A 2 3 4 5 6 7 8 9 10 J Q K)) )
   (se (make-suit 'H) (make-suit 'S) (make-suit 'D) (make-suit 'C)) )
 
 (define (make-deck)
