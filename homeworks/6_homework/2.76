@@ -1,0 +1,41 @@
+As a large system with generic operations evolves, 
+new types of data objects or new operations may be needed. 
+For each of the three strategies—generic operations with explicit dispatch, 
+data-directed style, and message-passing-style—describe the changes that 
+must be made to a system in order to add new types or new operations.
+Which organization would be most appropriate for a system in which new types must often be added? 
+Which would be most appropriate for a system in which new operations must often be added?
+
+
+1. EXPLICIT DISPATCH
+
+    a) Add new types
+        Create predicate to check new type - NOT THE BEST IDEA, VIOLATION OF OPEN-CLOSE PRINCIPLE
+        Add "ifs" inside all dispatcher's operations
+
+    b) Add new operations
+        Add "ifs" inside all dispatcher's operations
+
+2. DATA-DIRECTED
+
+    a) Add new types
+       We can "put" our methods inside new class' file, without altering other files
+
+    b) Add new operations
+        In order to register new operations we should alter our generic-operations library, where "apply-generic"
+        procedure is used
+
+3. MESSAGE-PASSING
+
+    a) Add new types
+       We can place our methods inside new class' file, without altering other files
+
+    b) Add new operations
+        In order to register new operations we should alter our "dispatch" method where we register
+        our available operations inside if clause
+
+Summary: 
+    Data-directed style as well as message-passing are both appropriate regarding adding new types.
+    However data-directed style would be better over message-passing technique because of more clear
+    way of registration that is we can define method in separate clauses comparing to
+    message-passing technique where registration is done inside of if clause
