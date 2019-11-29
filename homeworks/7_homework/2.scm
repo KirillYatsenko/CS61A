@@ -1,0 +1,10 @@
+(define-class (coke-machine cokes-fit price)
+	(instance-vars (deposited 0))
+	(instance-vars (cokes-left cokes-fit))
+	(method (deposit coins)
+		(set! deposited (+ deposited coins)))
+	(method (coke)
+		(cond 
+		  ((< deposited price) '(Not enought money))
+		  ((= cokes-left 0) '(Machine empty))
+		  (else (- deposited price)))))
