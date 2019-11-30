@@ -9,6 +9,7 @@
    (people '())
    (entry-procs '())
    (exit-procs '()))
+  (method (may-enter? person) #t)
   (method (type) 'place)
   (method (neighbors) (map cdr directions-and-neighbors))
   (method (exits) (map car directions-and-neighbors))
@@ -25,6 +26,7 @@
   (method (enter new-person)
     (if (memq new-person people)
 	(error "Person already in this place" (list name new-person)))
+    (for-each (lambda (person) (ask person 'notice new-person)) people) 
     (set! people (cons new-person people))
     (for-each (lambda (proc) (proc)) entry-procs)
     'appeared)
@@ -59,6 +61,15 @@
     (set! exit-procs '())
     (set! entry-procs '())
     'cleared) )
+
+(define-class (locked-place name)
+  (parent (place name))
+  (instance-vars
+    (is-locked #t))
+  (method (may-enter? person)
+    (not is-locked))
+  (method (unlock)
+    (set! is-locked #f)))
 
 (define-class (person name place)
   (instance-vars
@@ -106,6 +117,8 @@
     (let ((new-place (ask place 'look-in direction)))
       (cond ((null? new-place)
 	     (error "Can't go" direction))
+	    ((not (ask new-place 'may-enter? self))
+	     (error "Place is locked"))
 	    (else
 	     (ask place 'exit self)
 	     (announce-move name place new-place)
