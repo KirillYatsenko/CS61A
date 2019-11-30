@@ -2,19 +2,16 @@
 (load "adv-world")
 
 
-(define Me (instantiate person 'Me))
-
 (define Dormitory (instantiate place 'Dormitory))
-
-(ask Dormitory 'appear Me)
+(define Me (instantiate person 'Me Dormitory))
 
 (can-go Dormitory 'north 61A-Lab)
 
 (define Kirin (instantiate place 'Kirin))
 
 (can-go Soda 'north Kirin)
+(can-go Kirin 'south Soda)
 
 (define Potstickers (instantiate thing 'Potstickers))
 
 (ask Kirin 'appear Potstickers)
-

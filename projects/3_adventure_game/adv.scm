@@ -233,3 +233,11 @@
 (define (thing? obj)
   (and (procedure? obj)
        (eq? (ask obj 'type) 'thing)))
+
+; 2E
+
+(define-class (thing name)
+ (instance-vars (possessor 'no-one))
+ (method (type) 'thing)
+ (method (change-possessor new-possessor)
+   (set! possessor new-possessor)) )
