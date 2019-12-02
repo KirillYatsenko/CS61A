@@ -71,6 +71,35 @@
   (method (unlock)
     (set! is-locked #f)))
 
+(define-class (garage name)
+  (parent (place name))
+  (class-vars (count 0))
+  (instance-vars
+    (ticket-cars-dictionary (make-table)))
+  (method (generate-ticket)
+     (set! count(+ count 1))
+     (let ((ticket (instantiate ticket count)))
+       (insert! count ticket ticket-cars-dictionary)
+       ticket))
+  (method (park person-car)
+    (let ((owner (ask person-car 'possessor)))
+     (enter owner)
+     (let ((new-ticket (generate-ticket)))
+      (ask owner 'lose person-car)
+      (ask owner 'take new-ticket))))
+  (method (unpark ticket)
+	  (if (not (eq? (ask ticket 'name) 'ticket))
+	      (error "formal is not a ticket")
+	      (let ((owner-car (lookup (ask ticket 'number) ticket-cars-dictionary))))
+	     	 (if (not owner-car)
+		     (error "no car with given ticket number")
+		     (let ((ticket-owner (ask ticket 'possessor)))
+		          (ask ticket-owner 'lose ticket)
+		          (ask ticket-owner 'take owner-car)
+			  (insert! (ask ticket 'number) #f ticket-cars-dictionary))))))
+
+
+
 (define-class (person name place)
   (instance-vars
    (possessions '())
@@ -79,7 +108,7 @@
    (ask place 'enter self))
   (method (type) 'person)
   (method (look-around)
-    (map (lambda (obj) (ask obj 'name))
+    (map (lambda (obj) (ask obj 'name))1
 	 (filter (lambda (thing) (not (eq? thing self)))
 		 (append (ask place 'things) (ask place 'people)))))
   (method (take thing)
@@ -154,6 +183,8 @@
 	    dispatch)))
        (else (error "Bad message to class" class-message))))))
 
+(define-class (ticket number)
+  (parent (thing 'ticket))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Implementation of thieves for part two
@@ -253,4 +284,7 @@
  (instance-vars (possessor 'no-one))
  (method (type) 'thing)
  (method (change-possessor new-possessor)
-   (set! possessor new-possessor)) )
+   (set! possessor new-possessor)))
+
+
+
