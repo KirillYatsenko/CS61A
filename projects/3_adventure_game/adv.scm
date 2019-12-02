@@ -184,7 +184,7 @@
        (else (error "Bad message to class" class-message))))))
 
 (define-class (ticket number)
-  (parent (thing 'ticket))
+  (parent (thing 'ticket)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Implementation of thieves for part two
