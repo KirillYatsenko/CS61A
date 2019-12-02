@@ -108,7 +108,7 @@
    (ask place 'enter self))
   (method (type) 'person)
   (method (look-around)
-    (map (lambda (obj) (ask obj 'name))1
+    (map (lambda (obj) (ask obj 'name))
 	 (filter (lambda (thing) (not (eq? thing self)))
 		 (append (ask place 'things) (ask place 'people)))))
   (method (take thing)
