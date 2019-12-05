@@ -2,13 +2,33 @@
 ;; This file contains the definitions for the objects in the adventure
 ;; game and some utility procedures.
 
+(define-class (basic-object)
+  (instance-vars
+    (properties (make-table)))
+  (method (put property value)
+	  (insert! property value properties))
+  (default-method
+           (lookup message properties)))
+
+
 (define-class (place name)
+  (parent (basic-object))
   (instance-vars
    (directions-and-neighbors '())
    (things '())
    (people '())
    (entry-procs '())
    (exit-procs '()))
+  (method (place?) #t)
+  (method (peoples-possesions)
+	  (map (lambda (person)
+		 (ask person 'possessions)) 
+	       people))
+  (method (things-with-no-owner)
+	  (filter (lambda (thing)
+	            (let ((possessed-things people-possessions)
+			   (memq thing possessed-things))))
+		  things))
   (method (may-enter? person) #t)
   (method (type) 'place)
   (method (neighbors) (map cdr directions-and-neighbors))
@@ -62,6 +82,28 @@
     (set! entry-procs '())
     'cleared) )
 
+(define-class (hotspot password)
+   (instace-vars
+     (connected-laptops '()))
+   (initialize 
+     ((add-entry-procedure (lambda () (print "provide password")))))
+   (method (hotspot?) #t)
+   (method (gone thing)
+	   (if (laptop? thing)
+	     	(set! connected-laptops (delete thing connected-laptops)))
+	   (ask super 'gone thing))
+   (method (connect laptop provided-password)
+	(cond ((not (memq laptop (things)))
+	         (error "laptop not at hotstop"))
+	      ((not (eq? password provided-password))
+	       	 (error "passoword not correct"))
+	      (else 
+                ((set! connected-laptops (cons laptop connected-laptops))))))
+   (method (surf laptop url)
+	 (if (not (memq laptop connected-laptops))
+	        (error "connect first!")
+	        (system (string-append "lynx" url)))))
+
 (define-class (locked-place name)
   (parent (place name))
   (instance-vars
@@ -101,12 +143,21 @@
 
 
 (define-class (person name place)
+  (parent (basic-object))
   (instance-vars
    (possessions '())
    (saying ""))
   (initialize
-   (ask place 'enter self))
+   (ask place 'enter self)
+   (ask self 'put 'strength 100))
+  (method (person?) #t)
   (method (type) 'person)
+  (method (take-all)
+	 (let ((unowned-things (ask place 'things-with-no-owner)))
+	   (for-each
+	     (lambda (thing)
+	       (take thing)))))
+  
   (method (look-around)
     (map (lambda (obj) (ask obj 'name))
 	 (filter (lambda (thing) (not (eq? thing self)))
@@ -127,8 +178,10 @@
 	      (if (and (not (eq? pers self)) ; ignore myself
 		       (memq thing (ask pers 'possessions)))
 		  (begin
-		   (ask pers 'lose thing)
-		   (have-fit pers))))
+		    (if (< (ask self 'strength) (ask pers 'strength))
+		        (error "You are weak!")
+		        ((ask pers 'lose thing)
+		         (have-fit pers))))))
 	    (ask place 'people))
 	       
 	   (ask thing 'change-possessor self)
@@ -272,19 +325,30 @@
 
 (define (person? obj)
   (and (procedure? obj)
-       (member? (ask obj 'type) '(person police thief))))
+       (ask obj 'person? )))
 
 (define (thing? obj)
   (and (procedure? obj)
-       (eq? (ask obj 'type) 'thing)))
+       (ask obj 'thing?)))
 
 ; 2E
 
 (define-class (thing name)
+ (parent (basic-object))
  (instance-vars (possessor 'no-one))
+ (method (thing?) #t)
  (method (type) 'thing)
  (method (change-possessor new-possessor)
    (set! possessor new-possessor)))
 
 
-
+(define-class (laptop name)
+  (parent  (thing name))
+  (method (laptop?) #t)
+  (method (connect hotspot-password)
+	  ((ask (ask possessor 'place) 'connect selft hotspot-password)))
+  (method (surf url)
+	  (let ((place (ask possessor 'place))
+		       (if (hotspot? place)
+			   (ask hotspot  'surf self url)
+			   (error "laptop not connected to the hotspot"))))))
