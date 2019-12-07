@@ -80,9 +80,26 @@
   (method (clear-all-procs)
     (set! exit-procs '())
     (set! entry-procs '())
-    'cleared) )
+    'cleared))
+
+(define-class (restaurant name food-class price)
+  (parent (place name))
+  (method (menu)
+	  (list (ask food-class 'name) price))
+  (method (sell buyer food-name)
+	  (if (not (equal? (ask food-class 'name) food-name))
+	      (error "restaurant does not sell any food with given name")
+	      (let ((can-buy (ask buyer 'pay-money price)))
+		     (if (not can-buy)
+			 can-buy
+			 (instantiate food-class name))))))
+
+(define-class (jail)
+  (parent (place 'jail))
+  (method (is-jail?) #t))
 
 (define-class (hotspot password)
+   (parent (place 'hotspot))
    (instace-vars
      (connected-laptops '()))
    (initialize 
@@ -146,12 +163,27 @@
   (parent (basic-object))
   (instance-vars
    (possessions '())
-   (saying ""))
+   (saying "")
+   (money 100))
   (initialize
    (ask place 'enter self)
    (ask self 'put 'strength 100))
   (method (person?) #t)
   (method (type) 'person)
+  (method (get-money amount)
+	  (set! money (+ money amount)))
+  (method (pay-money amount)
+	  (if (> amount money)
+	      #f
+	      ((set! money (- money amount))
+	       #t)))
+  (method (buy food-name)
+	  (let ((success-deal (ask place 'sell self good)))
+	    (if (not success-deal)
+		#f
+		(set! possessions (cons thing possessions)))))
+	    	
+	  (if (ask place 'sell self food))
   (method (take-all)
 	 (let ((unowned-things (ask place 'things-with-no-owner)))
 	   (for-each
@@ -195,6 +227,16 @@
   (method (set-talk string) (set! saying string))
   (method (exits) (ask place 'exits))
   (method (notice person) (ask self 'talk))
+  (method (go-directly-to new-place)
+	  (ask place 'exit self)
+	  (announce-move name place new-place)
+	   (for-each
+	      (lambda (p)
+		(ask place 'gone p)
+		(ask new-place 'appear p))
+	      possessions)
+	     (set! place new-place)
+	     (ask new-place 'enter self))
   (method (go direction)
     (let ((new-place (ask place 'look-in direction)))
       (cond ((null? new-place)
@@ -255,7 +297,9 @@
 
   (method (notice person)
     (if (eq? behavior 'run)
-	(ask self 'go (pick-random (ask (usual 'place) 'exits)))
+	(if (is-jail? (ask self 'place))
+	    '(thief wont run from jail)
+	    (ask self 'go (pick-random (ask (usual 'place) 'exits))))
 	(let ((food-things
 	       (filter (lambda (thing)
 			 (and (edible? thing)
