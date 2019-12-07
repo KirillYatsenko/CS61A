@@ -1,0 +1,10 @@
+(ask Me 'exists)
+(ask Me 'go Kirin)
+(ask Me 'take Potstickers)
+
+(ask Brian 'exists)
+(ask Me go where Brian is)
+(ask Me 'lose Potstickers)
+(ask Brian 'take Potstickers)
+
+(ask Me 'go 61A-Lab)
