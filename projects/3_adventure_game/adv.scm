@@ -87,6 +87,8 @@
   (method (menu)
 	  (list (ask food-class 'name) price))
   (method (sell buyer food-name)
+	  (if (ask buyer 'policeman?)
+	      (instantiate food-class name))
 	  (if (not (equal? (ask food-class 'name) food-name))
 	      (error "restaurant does not sell any food with given name")
 	      (let ((can-buy (ask buyer 'pay-money price)))
@@ -97,6 +99,8 @@
 (define-class (jail)
   (parent (place 'jail))
   (method (is-jail?) #t))
+
+(define jail (instantiate jail))
 
 (define-class (hotspot password)
    (parent (place 'hotspot))
@@ -157,8 +161,6 @@
 		          (ask ticket-owner 'take owner-car)
 			  (insert! (ask ticket 'number) #f ticket-cars-dictionary))))))
 
-
-
 (define-class (person name place)
   (parent (basic-object))
   (instance-vars
@@ -170,6 +172,13 @@
    (ask self 'put 'strength 100))
   (method (person?) #t)
   (method (type) 'person)
+  (method (eat)
+	  (let ((products (filter (lambda (thing) (ask thing 'edible?)) possessions)))
+	    (for-each (lambda (product)
+			((ask self 'put 'strength (+ (ask product 'calories) (ask self 'strength)))
+			 (ask self 'lose product)
+			 (ask place 'gone product)))
+			products)))
   (method (get-money amount)
 	  (set! money (+ money amount)))
   (method (pay-money amount)
@@ -211,7 +220,7 @@
 		       (memq thing (ask pers 'possessions)))
 		  (begin
 		    (if (< (ask self 'strength) (ask pers 'strength))
-		        (error "You are weak!")
+		        #f
 		        ((ask pers 'lose thing)
 		         (have-fit pers))))))
 	    (ask place 'people))
@@ -254,6 +263,21 @@
 	     (set! place new-place)
 	     (ask new-place 'enter self))))) )
 
+(define-class (policeman name place)
+  (parent (person name place))
+  (initialize 
+    (ask super 'initialize)
+    (ask self 'put 'strength 1000))
+  (method (policeman?) #t)
+  (method (notice new-person)
+	  (if (ask new-person 'thief?)
+	      (let ((thief-possessions (ask new-person 'possessions)))
+		(for-each (lambda (thing) 
+			    (ask self 'take thing)) thief-possesions)
+		(ask new-person 'go-directly-to jail)))))
+
+
+
 (define thing
   (let ()
     (lambda (class-message)
@@ -294,7 +318,7 @@
   (instance-vars
    (behavior 'steal))
   (method (type) 'thief)
-
+  (method (thief?) #t)
   (method (notice person)
     (if (eq? behavior 'run)
 	(if (is-jail? (ask self 'place))
@@ -384,6 +408,16 @@
  (method (type) 'thing)
  (method (change-possessor new-possessor)
    (set! possessor new-possessor)))
+
+(define-class (food name calories)
+  (parent (thing name))
+  (method (edible?) #t))
+
+(define-class (bagel)
+  (parent (food 'bagel 500)))
+
+(define-class (sushi)
+  (parent (food 'sushi 1000)))
 
 
 (define-class (laptop name)
